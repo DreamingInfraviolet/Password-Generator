@@ -5,6 +5,10 @@ class SqlIO
 {
     public function createEntry($entry)
     {
+        Mysqlw::instance()->wqueryE("DELETE FROM entries WHERE
+            cumulative_password_hash=? and website_name_hash=?",
+            array($entry->cumulative_password_hash, $entry->website_name_hash,),
+            "Unable to clean previous entry");
         Mysqlw::instance()->wqueryE("INSERT INTO entries
             (
                 cumulative_password_hash,
@@ -12,19 +16,9 @@ class SqlIO
                 min_length,
                 max_length,
                 avoid_dictionary_attacks
-            ) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE
-            cumulative_password_hash=?,
-            website_name_hash=?,
-            min_length=?,
-            max_length=?,
-            avoid_dictionary_attacks=?",
+            ) VALUES (?,?,?,?,?)",
             array
             (
-            $entry->cumulative_password_hash,
-            $entry->website_name_hash,
-            $entry->min_length,
-            $entry->max_length,
-            $entry->avoid_dictionary_attacks,
             $entry->cumulative_password_hash,
             $entry->website_name_hash,
             $entry->min_length,
