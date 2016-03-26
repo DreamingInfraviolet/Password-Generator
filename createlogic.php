@@ -42,8 +42,8 @@ function generate($sqlio)
     $entry = new Entry();
     $entry->cumulative_password_hash = $passHash;
     $entry->website_name_hash = $idHash;
-    $entry->min_length = empty($_POST['minlen']) ? 6: min(6, $_POST['minlen']);
-    $entry->max_length = empty($_POST['maxlen']) ? 20: max(50, $_POST['maxlen']);
+    $entry->min_length = empty($_POST['minlen']) ? 6: max(6, $_POST['minlen']);
+    $entry->max_length = empty($_POST['maxlen']) ? 20: min(50, $_POST['maxlen']);
     $entry->avoid_dictionary_attacks = !empty($_POST['avoiddict']) ? 1:null;
 
     $sqlio->createEntry($entry);
