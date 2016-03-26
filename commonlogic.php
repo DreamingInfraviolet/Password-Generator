@@ -2,10 +2,8 @@
 
 $specialCharactersAllowed = array("#", "!", "@", "_", "?");
 $letters =array("a","b","c","d","e","f","g","h","i","j","k","l","m","n","o",
-    "p","q","r","s","t","u","v","w","x","y","z","A","B","C","D","E","F","G","H","I",
-    "J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z");
+    "p","q","r","s","t","u","v","w","x","y","z");
 $numbers = array("0","1","2","3","4","5","6","7","8","9");
-$randTable = array_merge($letters, $numbers, $specialCharactersAllowed);
 
 $specialCharactersAllowedRegex="[";
 foreach($specialCharactersAllowed as $c)
@@ -15,9 +13,9 @@ $specialCharactersAllowedRegex.="]";
 function normaliseInput()
 {
     if(isset($_POST["siteid"]))
-        $_POST["siteid"] = strtolower(trim($_POST["siteid"]));
-    if(isset($_POST["siteic"]))
-        $_POST["siteic"] = strtolower(trim($_POST["siteic"]));
+        $_POST["siteid"] = str_replace(' ', '', strtolower(trim($_POST["siteid"])));
+    if(isset($_POST["siteidc"]))
+        $_POST["siteidc"] =  str_replace(' ', '', strtolower(trim($_POST["siteidc"])));
     if(isset($_POST["password1"]))
         $_POST["password1"] = trim($_POST["password1"]);
     if(isset($_POST["password2"]))
@@ -27,9 +25,9 @@ function normaliseInput()
     if(isset($_POST["password2c"]))
         $_POST["password2c"] = trim($_POST["password2c"]);
     if(isset($_POST["minlen"]))
-        $_POST["minlen"] = intval($_POST["minlen"]);
+        $_POST["minlen"] = empty($_POST["minlen"]) ? 6:intval($_POST["minlen"]);
     if(isset($_POST["maxlen"]))
-        $_POST["maxlen"] = intval($_POST["maxlen"]);
+        $_POST["maxlen"] = empty($_POST["maxlen"]) ? 20:intval($_POST["maxlen"]);
 }
 
 function isPassValid($pass, $minLength, $maxLength)
@@ -69,21 +67,21 @@ function capitaliseRandom($pass)
 {
     $strout="";
     $strlen = strlen($pass);
-    for( $i = 0; $i < $strlen; $i++)
+    for( $i = 0; $i < $strlen; ++$i)
     {
         $char = $pass[$i];
         //Skip characters that are difficult to read if capitalised:
         if($char=="i")
             $strout.=$char;
         else
-            $strout.= mt_rand(0,100) < 20 ? strtoupper($char):$char;
+            $strout.= mt_rand(0,5) < 1 ? strtoupper($char):$char;
     }
     return $strout;
 }
 
 function generatePassword($idHash, $passHash, $minLength, $maxLength, $noDict)
 {
-    global $specialCharactersAllowed, $letters, $numbers, $randTable;
+    global $specialCharactersAllowed, $letters, $numbers, $letters;
 
     $h = md5($idHash . $passHash);
     $seed = intval(substr($h, 0, 8), 16) ^
@@ -95,7 +93,7 @@ function generatePassword($idHash, $passHash, $minLength, $maxLength, $noDict)
     $words = null;
 
     if($noDict)
-        $words = $randTable;
+        $words = $letters;
     else
         $words = loadWords();
 
@@ -104,7 +102,6 @@ function generatePassword($idHash, $passHash, $minLength, $maxLength, $noDict)
     do
     {
         $pass="";
-        $previousPass="";
         $retries=0;
         $longestPass = $pass;
 

@@ -15,10 +15,10 @@ function verifyInput()
         $msg.="Password 1 too long.<br>";
     if(strlen($_POST['password2'])<6)
         $msg.="Password 2 too short.<br>";
-    if($_POST['password1']==$_POST['password2'])
-        $msg.="Password 1 and 2 can not be the same.<br>";
     if(strlen($_POST['password2'])>50)
         $msg.="Password 2 too long.<br>";
+    if($_POST['password1']==$_POST['password2'])
+        $msg.="Password 1 and 2 can not be the same.<br>";
     if($_POST['password1c']!=$_POST['password1'])
         $msg.="Password 1 confirmation does not match.<br>";
     if($_POST['password2c']!=$_POST['password2'])
