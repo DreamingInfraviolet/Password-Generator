@@ -1,6 +1,6 @@
 <?php
 
-require_once $_SERVER['DOCUMENT_ROOT'] . "dbinfo.php";
+require_once "dbinfo.php";
 ?>
 
 <?php
@@ -59,8 +59,8 @@ class Mysqlw
 
     private function __construct()
     {
-        global $us_mysql_username, $us_mysql_password, $dbHost, $dbDatabase;
-        $this->con = new mysqli($dbHost, $us_mysql_username, $us_mysql_password, $dbDatabase);
+        global $dbUsername, $dbPassword, $dbHost, $dbDatabase;
+        $this->con = new mysqli($dbHost, $dbUsername, $dbPassword, $dbDatabase);
         if ($this->con->connect_errno)
             throw new Exception("Connect failed: " . $this->con->connect_error);
         Mysqlw::$instance=null;

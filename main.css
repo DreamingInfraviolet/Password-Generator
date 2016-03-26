@@ -3,7 +3,20 @@ body
     margin: 15px;
 }
 
-.error
+#error
 {
     color: red;
+    background-color: pink;
+}
+
+#success
+{
+    color: green;
+    background-color: #aaffaa;
+    padding:5px;
+}
+
+#error, #success
+{
+    text-align: center;
 }

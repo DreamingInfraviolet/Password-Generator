@@ -1,6 +1,6 @@
 <?php
 $dbUsername = "root";
 $dbHost = "localhost";
-$dbDatabase = "rp";
+$dbDatabase = "ps_amareth_space";
 $dbPassword = "";
 ?>
