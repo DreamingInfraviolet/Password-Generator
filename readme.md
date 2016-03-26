@@ -10,6 +10,11 @@ and to keep the code small. This is normally okay as people don't need to genera
 passwords often, but may fall down when thousands of users are generating passwords all the time.
 If this is a problem though then you're free to optimise it for your needs :)
 
+## Inspiration
+My Spotify account was hacked by a loser from Germany, and I was just happy that I used a different
+password on my email accounts for security. However, many of my other accounts shared passwords.
+It's really not safe to have one password for everything :)
+
 ## Privacy
 Only anonymous information is stored in the database for additional features.
 It is not possible to extract your passwords, the website you generated passwords for,
