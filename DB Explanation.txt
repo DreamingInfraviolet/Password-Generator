@@ -1,0 +1,14 @@
+The database will be used to store restrictions on different websites.
+Let's say google.com requires a minimum length of 6, while facebook doesn't allow
+the _ character (for example :P). The page will take these limitations into account
+and store them in the database per user so that they will be applied next time
+they generate a password without having to be explicitly specified.
+
+Table:
+    Cumulative Password Hash (unique per user. User ID :3)
+    Website name (trimmed, lowercase, hashed)
+    Min Length (null=none)
+    Max length (null=none)
+    Forbidden characters (null=none)
+    Avoid dictionary attacks (null=no)
+    When the password was added
