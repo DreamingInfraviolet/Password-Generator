@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ps Amareth Space</title>
+    <title>Ps Quasar Waves</title>
     <meta charset="utf-8">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" type="text/css" rel="stylesheet">
     <link href="main.css" type="text/css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <center><h1>Password Amareth Space</h1></center>
+        <center><h1>Password Quasar Waves</h1></center>
         <div id="error">
         <?php
         $is1 = isset($_POST['submit1']);

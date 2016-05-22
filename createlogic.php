@@ -23,8 +23,8 @@ function verifyInput()
         $msg.="Password 1 confirmation does not match.<br>";
     if($_POST['password2c']!=$_POST['password2'])
         $msg.="Password 2 confirmation does not match.<br>";
-    if($_POST['maxlen']-$_POST['minlen']<6)
-        $msg.="Resulting password too small - adjust min and max constraints.";
+    if($_POST['maxlen']-$_POST['minlen']<1)
+        echo "Warning: Password range too small, may not be able to satisfy.";
     if($msg!=null)
     {
         echo $msg;
