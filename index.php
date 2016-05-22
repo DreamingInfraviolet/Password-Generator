@@ -34,8 +34,15 @@
         $answer=null;
         require_once "sqlio.php";
 
+        try
+        {
         if($postReady)
             $answer = generate(new SqlIO());
+        }
+        catch(Exception $e)
+        {
+            print $e->getMessage();
+        }
         ?>
         </div>
         <?php if($answer!=null) { ?>

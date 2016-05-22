@@ -33,13 +33,13 @@ function normaliseInput()
 function isPassValid($pass, $minLength, $maxLength)
 {
     global $specialCharactersAllowedRegex;
-    $valid = true;
-    $valid &= $pass >= $minLength and $pass <= $maxLength;
-    $valid &= preg_match_all("/".$specialCharactersAllowedRegex."/", $pass)>0;
-    $valid &= preg_match_all("/[a-z]/", $pass)>0;
-    $valid &= preg_match_all("/[A-Z]/", $pass)>0;
-    $valid &= preg_match_all("/[0-9]/", $pass)>0;
-    return $valid;
+    if(!($pass >= $minLength and $pass <= $maxLength)
+    || !(preg_match_all("/".$specialCharactersAllowedRegex."/", $pass)>0)
+    || !(preg_match_all("/[a-z]/", $pass)>0)
+    || !(preg_match_all("/[A-Z]/", $pass)>0)
+    || !(preg_match_all("/[0-9]/", $pass)>0))
+        return false;
+    return true;
 }
 
 function getIdHash($id)
@@ -50,12 +50,6 @@ function getIdHash($id)
 function getPassHash($pass1, $pass2)
 {
     return md5($pass1 . md5($pass2));
-}
-
-function doesEntryExistPermute($sqlio, $idhash, $pass1, $pass2)
-{
-    return $sqlio->doesEntryExist(getPassHash($pass1, $pass2), $idhash)
-        || $sqlio->doesEntryExist(getPassHash($pass2, $pass1), $idhash);
 }
 
 function loadWords()
@@ -84,13 +78,13 @@ function generatePassword($idHash, $passHash, $minLength, $maxLength, $noDict)
     global $specialCharactersAllowed, $letters, $numbers, $letters;
 
     $h = md5($idHash . $passHash);
-    $seed = intval(substr($h, 0, 8), 16) ^
-            intval(substr($h, 8, 8), 16) ^
-            intval(substr($h, 16, 8), 16) ^
-            intval(substr($h, 24, 8), 16);
-    mt_srand($seed);
+    $seed = intval(substr($h, 0, 7), 16) ^
+            intval(substr($h, 8, 7), 16) ^
+            intval(substr($h, 16, 7), 16) ^
+            intval(substr($h, 24, 7), 16);
 
     $words = null;
+    mt_srand($seed);
 
     if($noDict)
         $words = $letters;
@@ -99,6 +93,8 @@ function generatePassword($idHash, $passHash, $minLength, $maxLength, $noDict)
 
     $wordLen = count($words);
     $pass=null;
+    $max_retries = 40000;
+
     do
     {
         $pass="";
@@ -137,7 +133,7 @@ function generatePassword($idHash, $passHash, $minLength, $maxLength, $noDict)
         $pass = capitaliseRandom($pass);
 
         //Only quit if this password satisfies important properties. Otherwise retry.
-    } while(!isPassValid($pass, $minLength, $maxLength));
+    } while(!isPassValid($pass, $minLength, $maxLength) and ($max_retries--) > 0);
 
     return $pass;
 }
