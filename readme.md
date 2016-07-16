@@ -1,4 +1,4 @@
-# rp.amareth.space
+# ps.amareth.space
 
 This PHP application is designed to increase security by generating
 unique passwords for different websites.
