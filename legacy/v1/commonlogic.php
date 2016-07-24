@@ -10,22 +10,52 @@ foreach($specialCharactersAllowed as $c)
     $specialCharactersAllowedRegex.=$c;
 $specialCharactersAllowedRegex.="]";
 
+function normaliseInput()
+{
+    if(isset($_POST["siteid"]))
+        $_POST["siteid"] = str_replace(' ', '', strtolower(trim($_POST["siteid"])));
+    if(isset($_POST["siteidc"]))
+        $_POST["siteidc"] =  str_replace(' ', '', strtolower(trim($_POST["siteidc"])));
+    if(isset($_POST["password1"]))
+        $_POST["password1"] = trim($_POST["password1"]);
+    if(isset($_POST["password2"]))
+        $_POST["password2"] = trim($_POST["password2"]);
+    if(isset($_POST["password1c"]))
+        $_POST["password1c"] = trim($_POST["password1c"]);
+    if(isset($_POST["password2c"]))
+        $_POST["password2c"] = trim($_POST["password2c"]);
+    if(isset($_POST["minlen"]))
+        $_POST["minlen"] = empty($_POST["minlen"]) ? 6:intval($_POST["minlen"]);
+    if(isset($_POST["maxlen"]))
+        $_POST["maxlen"] = empty($_POST["maxlen"]) ? 20:intval($_POST["maxlen"]);
+}
+
 function isPassValid($pass, $minLength, $maxLength)
 {
     global $specialCharactersAllowedRegex;
-    if(!($pass >= $minLength and $pass <= $maxLength)
-    || !(preg_match_all("/".$specialCharactersAllowedRegex."/", $pass)>0)
-    || !(preg_match_all("/[a-z]/", $pass)>0)
-    || !(preg_match_all("/[A-Z]/", $pass)>0)
-    || !(preg_match_all("/[0-9]/", $pass)>0))
-        return false;
-    return true;
+    $valid = true;
+    $valid &= $pass >= $minLength and $pass <= $maxLength;
+    $valid &= preg_match_all("/".$specialCharactersAllowedRegex."/", $pass)>0;
+    $valid &= preg_match_all("/[a-z]/", $pass)>0;
+    $valid &= preg_match_all("/[A-Z]/", $pass)>0;
+    $valid &= preg_match_all("/[0-9]/", $pass)>0;
+    return $valid;
 }
 
+function getIdHash($id)
+{
+    return md5($id);
+}
 
 function getPassHash($pass1, $pass2)
 {
     return md5($pass1 . md5($pass2));
+}
+
+function doesEntryExistPermute($sqlio, $idhash, $pass1, $pass2)
+{
+    return $sqlio->doesEntryExist(getPassHash($pass1, $pass2), $idhash)
+        || $sqlio->doesEntryExist(getPassHash($pass2, $pass1), $idhash);
 }
 
 function loadWords()
@@ -51,18 +81,16 @@ function capitaliseRandom($pass)
 
 function generatePassword($idHash, $passHash, $minLength, $maxLength, $noDict)
 {
-    //print("id: $idHash, pass: $passHash, min: $minLength, max: $maxLength, noDict: $noDict<br>");   
     global $specialCharactersAllowed, $letters, $numbers, $letters;
 
     $h = md5($idHash . $passHash);
-    $seed = intval(substr($h, 0, 7), 16) ^
-            intval(substr($h, 8, 7), 16) ^
-            intval(substr($h, 16, 7), 16) ^
-            intval(substr($h, 24, 7), 16);
+    $seed = intval(substr($h, 0, 8), 16) ^
+            intval(substr($h, 8, 8), 16) ^
+            intval(substr($h, 16, 8), 16) ^
+            intval(substr($h, 24, 8), 16);
+    mt_srand($seed);
 
     $words = null;
-
-    mt_srand($seed);
 
     if($noDict)
         $words = $letters;
@@ -71,8 +99,6 @@ function generatePassword($idHash, $passHash, $minLength, $maxLength, $noDict)
 
     $wordLen = count($words);
     $pass=null;
-    $max_retries = 40000;
-
     do
     {
         $pass="";
@@ -111,7 +137,7 @@ function generatePassword($idHash, $passHash, $minLength, $maxLength, $noDict)
         $pass = capitaliseRandom($pass);
 
         //Only quit if this password satisfies important properties. Otherwise retry.
-    } while(!isPassValid($pass, $minLength, $maxLength) and ($max_retries--) > 0);
+    } while(!isPassValid($pass, $minLength, $maxLength));
 
     return $pass;
 }

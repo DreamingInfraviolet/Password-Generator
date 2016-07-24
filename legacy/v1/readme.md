@@ -1,19 +1,14 @@
-# ps.amareth.space
+# rp.amareth.space
 
 This PHP application is designed to increase security by generating
 unique passwords for different websites.
 These passwords do not change over time and are different for each user,
-meaning that if one of your accounts is compromised the others will not be.
+meaning that if one of your accounts is compromised the others will not.
 
 It was not designed to be efficient, as I wanted to write it relatively quickly
 and to keep the code small. This is normally okay as people don't need to generate
 passwords often, but may fall down when thousands of users are generating passwords all the time.
 If this is a problem though then you're free to optimise it for your needs :)
-
-## Inspiration
-My Spotify account was hacked by a loser from Germany, and I was just happy that I used a different
-password on my email accounts for security. However, many of my other accounts shared passwords.
-It's really not safe to have one password for everything :)
 
 ## Privacy
 Only anonymous information is stored in the database for additional features.
@@ -41,19 +36,3 @@ To set up this code on your own server, you should just copy these files to a ho
 You may need to change your database information in dbinfo.php. You must then run the setup.sql
 file to create the relevant table in your database. You should make sure not to copy the setup
 or test folders, however.
-
-# Changelog
-
-## 1.0.0
-* Created initial version of the site.
-
-## 2.0.0
-* Found a bug that resulted in the password being of an incorrect length. This fix breaks previous passwords.
-* Made minor improvements, such as hiding the password output.
-* Fixed different outputs on 32 and 64 bit architectures
-
-## 2.1.0
-* Using AJAX to retrieve password to avoid being able to recall the result after closing
-* Adding username field and refactoring database to avoid password/site collisions.
-* Improving security by no longer storing hashed passwords. If you type the wrong password when retrieving, you'll get the wrong result.
-* Moving from md5 to sha+md5.

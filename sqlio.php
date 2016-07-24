@@ -3,46 +3,73 @@ require_once "mysqlw.php";
 
 class SqlIO
 {
-    public function createEntry($entry)
+    private static function hashText($text)
     {
-        Mysqlw::instance()->wqueryE("DELETE FROM entries WHERE
-            cumulative_password_hash=? and website_name_hash=?",
-            array($entry->cumulative_password_hash, $entry->website_name_hash,),
-            "Unable to clean previous entry");
+        for($i = 0; $i < 20000; ++$i)
+            $text = md5(hash("sha256", $text.$i));
+        return $text;
+    }
+
+    public function createEntry($username, $site, $min_length, $max_length, $avoid_dictionary_attacks)
+    {
+        $username = $this->hashText($username);
+        $site = $this->hashText($site);
+
+        Mysqlw::instance()->wqueryE("DELETE FROM entries WHERE username_hash=? and website_hash=?",
+            array($username, $site), "Unable to clean previous entry");
+
         Mysqlw::instance()->wqueryE("INSERT INTO entries
             (
-                cumulative_password_hash,
-                website_name_hash,
-                min_length,
-                max_length,
-                avoid_dictionary_attacks
+                username_hash, website_hash, min_length, max_length, avoid_dictionary_attacks
             ) VALUES (?,?,?,?,?)",
-            array
-            (
-            $entry->cumulative_password_hash,
-            $entry->website_name_hash,
-            $entry->min_length,
-            $entry->max_length,
-            $entry->avoid_dictionary_attacks
-            ),
+            array($username, $site, $min_length, $max_length, $avoid_dictionary_attacks),
             "failed executing creation SQL");
     }
-    public function retrieveEntry($passHash, $entrySiteHash)
+
+    public function retrieveEntry($username, $site)
     {
-        $obj = Mysqlw::instance()->wqueryE("SELECT * from entries
-            WHERE cumulative_password_hash=? and website_name_hash=?", array($passHash, $entrySiteHash),
-            "unable to check if entry exists")->fetch_object();
+        $username = $this->hashText($username);
+        $site = $this->hashText($site);
+
+        $obj = Mysqlw::instance()->wqueryE("SELECT * from entries WHERE username_hash=? and website_hash=?",
+            array($username, $site), "unable to check if entry exists");
+
         if(Mysqlw::instance()->affected_rows==0)
             throw new Exception("Entry not found");
         else
-            return $obj;
+            return $obj->fetch_object();
     }
-    public function doesEntryExist($passHash, $entrySiteHash)
+
+    public function doesEntryExist($username, $site)
     {
-        Mysqlw::instance()->wqueryE("SELECT cumulative_password_hash from entries
-            WHERE cumulative_password_hash=? and website_name_hash=?", array($passHash, $entrySiteHash),
-            "unable to check if entry exists");
-        return Mysqlw::instance()->affected_rows!=0;
+        try
+        {
+            $this->retrieveEntry($username, $site);
+            return true;
+        }
+        catch(Exception $e) { return false; }
+    }
+
+    public function logSuccessRetrieval($entryId)
+    {
+        Mysqlw::instance()->wqueryE("INSERT INTO `successful_requests` (`entryId`, `ip`) VALUES(?, ?)", array($entryId, $_SERVER['REMOTE_ADDR']));
+    }
+
+    public function logFailedRetrieval()
+    {
+        Mysqlw::instance()->wqueryE("INSERT INTO `failed_requests` (`ip`) VALUES(?)", array($_SERVER['REMOTE_ADDR']));
+    }
+
+    public function shouldBeBlocked()
+    {
+        //Select all failed requests that happened in the last n seconds. If it exists, block request.
+        $res = Mysqlw::instance()->wqueryE("SELECT * FROM `failed_requests` WHERE `ip`=?
+                    AND TIMESTAMPDIFF(SECOND, `timestamp`, CURRENT_TIMESTAMP) < 1",
+                array($_SERVER['REMOTE_ADDR']));
+        if(Mysqlw::instance()->affected_rows == 0)
+            return false;
+        else
+            return true;
     }
 }
 ?>

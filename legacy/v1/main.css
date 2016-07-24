@@ -1,32 +1,22 @@
-@font-face
-{
-    font-family: Mystery;
-    src: url(Mystery.ttf);
-}
-
 body
 {
     margin: 15px;
 }
 
-#error-box
+#error
 {
     color: red;
     background-color: pink;
 }
 
-#success-box
-{   
-
+#success
+{
     color: green;
     background-color: #aaffaa;
     padding:5px;
-    font-family: Mystery;
-    font-size: 0.7em;
 }
 
-#error-box, #success-box
+#error, #success
 {
     text-align: center;
 }
-

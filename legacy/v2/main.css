@@ -9,13 +9,13 @@ body
     margin: 15px;
 }
 
-#error-box
+#error
 {
     color: red;
     background-color: pink;
 }
 
-#success-box
+#success
 {   
 
     color: green;
@@ -25,7 +25,7 @@ body
     font-size: 0.7em;
 }
 
-#error-box, #success-box
+#error, #success
 {
     text-align: center;
 }

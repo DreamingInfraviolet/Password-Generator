@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ps Quasar Waves</title>
+    <meta charset="utf-8">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link href="main.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <center><h1>Password Quasar Waves</h1></center>
+        <div id="error-box"></div>
+        <input type="text" class="form-control" readonly id="success-box" style="display:none">
+        <div class="row">
+            <div class="col-sm-6">
+                <h2>Generate existing password</h2>
+                <div class="form-group">
+                    <input class="form-control" type="text" id="f1username" placeholder="Username" required><br>
+                    <input class="form-control" type="text" id="f1siteid" placeholder="Website Id" required><br>
+                </div>
+                <div class="form-group">
+                    <input class="form-control" type="password" id="f1flower1" placeholder="Password 1" required><br>
+                    <input class="form-control" type="password" id="f1flower2" placeholder="Password 2" required><br>
+                </div>
+                <div class="form-group">
+                    <input class="form-control" type="submit" id="f1submit" value="Retrieve"><br>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <h2>Generate new password</h2>
+                <div class="form-group">
+                    <p>Your username. This can be anything, as long as you use it next time to retrieve the password. It is not used when generating your password.</p>
+                    <input class="form-control" type="text" id="f2username" placeholder="Username" required><br>
+                    <p>The name of the website. The password generator uses this to generate a unique password.</p>
+                    <input class="form-control" type="text" id="f2site" placeholder="Website Id" required><br>
+                </div>
+                <div class="form-group">
+                    <p>Two unique passwords for additional security. Minimum 6 letters. They are never stored.</p>
+                    <input class="form-control" type="password" id="f2flower1" placeholder="Password 1" required><br>
+                    <input class="form-control" type="password" id="f2flower2" placeholder="Password 2" required><br>
+                </div>
+                <div class="form-group">
+                    <input class="form-control" type="password" id="f2flower1c" placeholder="Confirm Password 1" required><br>
+                    <input class="form-control" type="password" id="f2flower2c" placeholder="Confirm Password 2" required><br>
+                </div>
+                <div class="form-group">
+                    <p>The following constrants are optional and may be used if the generated password does
+                        not satisfy your website's password requirements. They are stored to the database for
+                        future retrieval.</p>
+                    <input class="form-control" type="number" id="f2minlen" placeholder="Min Length"><br>
+                    <input class="form-control" type="number" id="f2maxlen" placeholder="Max Length"><br>
+                    <input type="checkbox" id="f2avoiddict"> Avoid Dictionary Attacks (less readable but required by some services)<br>
+                </div>
+                <div class="form-group">
+                    <input class="form-control" type="submit" id="f2submit" value="Create"><br>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-2.2.2.min.js" integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script>
+    $(document).ready(function() {
+
+        $('input').on("keypress", function(e)
+        {
+            /* ENTER PRESSED*/
+            if (e.keyCode == 13)
+            {
+                /* FOCUS ELEMENT */
+                var selected = $(this);
+                var id = selected.attr("id");
+                if(id.length >= 2)
+                {
+                    var start = id.substring(0, 2) ;
+                    if(start == "f1")
+                        retrieveCallback();
+                    else if(start == "f2")
+                        generateNewCallback();
+                }
+            }
+        });
+
+        function genericAjaxCallback(data)
+        {
+            var eb = $("#error-box");
+            var sb = $("#success-box");
+
+            eb.text("");
+            sb.text("");
+
+            try
+            {
+                data = JSON.parse(data);
+            }
+            catch(e)
+            {
+                data = { "status" : "filure", "data" : data };
+            }
+            finally
+            {
+                if(data['status'] != 'success')
+                    eb.text(data['data']);
+                else
+                {
+                    sb.css("display", "inline");
+                    sb.val(data['data']);
+                }
+            }
+        }
+
+        function retrieveCallback()
+        {
+            $.ajax({
+                url: "retrieve.php",
+                cache: false,
+                type: "post",
+                data: {
+                    username: $("#f1username").val(),
+                    site: $("#f1siteid").val(),
+                    flower1: $("#f1flower1").val(),
+                    flower2: $("#f1flower2").val(),
+                },
+                success: genericAjaxCallback,
+                error: function() {
+                    genericAjaxCallback("{status:'failure',data:'Could not send request. Try again later.'}");
+                }
+            });
+        }
+
+        function generateNewCallback()
+        {
+            $.ajax({
+                url: "create.php",
+                cache: false,
+                type: "post",
+                data: {
+                    username: $("#f2username").val(),
+                    site: $("#f2site").val(),
+                    flower1: $("#f2flower1").val(),
+                    flower2: $("#f2flower2").val(),
+                    flower1c: $("#f2flower1c").val(),
+                    flower2c: $("#f2flower2c").val(),
+                    minlen: $("#f2minlen").val(),
+                    maxlen: $("#f2maxlen").val(),
+                    avoiddict: $("#f2avoiddict").is(":checked")
+                },
+                success: genericAjaxCallback,
+                error: function() {
+                    genericAjaxCallback("{status:'failure',data:'Could not send request. Try again later.'}");
+                },
+            });
+        }
+
+        $("#f1submit").click(retrieveCallback);
+        $("#f2submit").click(generateNewCallback);
+    });
+    </script>
+</body>
+</html>

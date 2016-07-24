@@ -10,6 +10,26 @@ foreach($specialCharactersAllowed as $c)
     $specialCharactersAllowedRegex.=$c;
 $specialCharactersAllowedRegex.="]";
 
+function normaliseInput()
+{
+    if(isset($_POST["siteid"]))
+        $_POST["siteid"] = str_replace(' ', '', strtolower(trim($_POST["siteid"])));
+    if(isset($_POST["siteidc"]))
+        $_POST["siteidc"] =  str_replace(' ', '', strtolower(trim($_POST["siteidc"])));
+    if(isset($_POST["password1"]))
+        $_POST["password1"] = trim($_POST["password1"]);
+    if(isset($_POST["password2"]))
+        $_POST["password2"] = trim($_POST["password2"]);
+    if(isset($_POST["password1c"]))
+        $_POST["password1c"] = trim($_POST["password1c"]);
+    if(isset($_POST["password2c"]))
+        $_POST["password2c"] = trim($_POST["password2c"]);
+    if(isset($_POST["minlen"]))
+        $_POST["minlen"] = empty($_POST["minlen"]) ? 6:intval($_POST["minlen"]);
+    if(isset($_POST["maxlen"]))
+        $_POST["maxlen"] = empty($_POST["maxlen"]) ? 20:intval($_POST["maxlen"]);
+}
+
 function isPassValid($pass, $minLength, $maxLength)
 {
     global $specialCharactersAllowedRegex;
@@ -22,6 +42,10 @@ function isPassValid($pass, $minLength, $maxLength)
     return true;
 }
 
+function getIdHash($id)
+{
+    return md5($id);
+}
 
 function getPassHash($pass1, $pass2)
 {
@@ -51,7 +75,8 @@ function capitaliseRandom($pass)
 
 function generatePassword($idHash, $passHash, $minLength, $maxLength, $noDict)
 {
-    //print("id: $idHash, pass: $passHash, min: $minLength, max: $maxLength, noDict: $noDict<br>");   
+    print("id: $idHash, pass: $passHash, min: $minLength, max: $maxLength, noDict: $noDict<br>");  
+
     global $specialCharactersAllowed, $letters, $numbers, $letters;
 
     $h = md5($idHash . $passHash);
